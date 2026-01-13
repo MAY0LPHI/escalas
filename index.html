@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Escala Pro | Gestão de Turnos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-900 font-['Inter'] antialiased">
+
+    <div id="drawerOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden transition-opacity lg:hidden"></div>
+    
+    <!-- Sidebar / Navigation -->
+    <aside id="mainSidebar" class="fixed top-0 left-0 h-full w-72 bg-white border-r border-slate-200 z-[60] -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-xl lg:shadow-none">
+        <div class="h-full flex flex-col p-6 overflow-y-auto">
+            <div class="flex items-center gap-3 mb-10">
+                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
+                    <i data-lucide="calendar-check-2" class="w-6 h-6"></i>
+                </div>
+                <span class="text-2xl font-black tracking-tighter text-slate-900">Escala<span class="text-blue-600">Pro</span></span>
+            </div>
+
+            <div class="space-y-8 flex-1">
+                <!-- Seção Principal -->
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Controle de Data</label>
+                    <input type="date" id="dateSelector" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-base font-bold outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                </div>
+
+                <div class="space-y-3">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Gestão de Equipe</label>
+                    <button id="addEmployeeBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl font-bold flex items-center justify-center gap-3 shadow-lg shadow-blue-100 transition-all active:scale-95 group">
+                        <i data-lucide="user-plus" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                        Novo Colaborador
+                    </button>
+                    <button id="manageRolesBtn" class="w-full bg-white text-slate-700 p-4 rounded-xl font-bold flex items-center justify-center gap-3 border border-slate-200 hover:bg-slate-50 transition-all">
+                        <i data-lucide="layers" class="w-5 h-5 text-blue-500"></i>
+                        Gerenciar Cargos
+                    </button>
+                </div>
+
+                <div class="pt-6 border-t border-slate-100">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Sistema e Backup</label>
+                    <div class="grid grid-cols-1 gap-2">
+                        <button id="exportBackupBtn" class="w-full bg-slate-50 text-slate-700 p-3 rounded-xl font-bold flex items-center gap-3 border border-slate-200 hover:bg-slate-100 transition-colors">
+                            <i data-lucide="download" class="w-4 h-4 text-blue-600"></i>
+                            <span class="text-sm">Exportar Backup</span>
+                        </button>
+                        <button id="importBackupBtn" class="w-full bg-slate-50 text-slate-700 p-3 rounded-xl font-bold flex items-center gap-3 border border-slate-200 hover:bg-slate-100 transition-colors">
+                            <i data-lucide="upload" class="w-4 h-4 text-indigo-600"></i>
+                            <span class="text-sm">Importar Backup</span>
+                        </button>
+                        <input type="file" id="importFileInput" class="hidden" accept=".json">
+                    </div>
+                    
+                    <button id="resetDataBtn" class="w-full mt-4 bg-white text-red-500 p-3 rounded-xl font-bold flex items-center gap-3 border border-red-100 hover:bg-red-50 transition-colors group">
+                        <i data-lucide="trash-2" class="w-4 h-4 group-hover:animate-bounce"></i>
+                        <span class="text-sm">Zerar Dados</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-slate-100">
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center">v2.2 Stable</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Mobile Header -->
+    <header class="lg:hidden sticky top-0 z-40 bg-white border-b border-slate-200 px-4 py-3 flex justify-between items-center shadow-sm">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white">
+                <i data-lucide="calendar-check-2" class="w-4 h-4"></i>
+            </div>
+            <span class="text-lg font-black">EscalaPro</span>
+        </div>
+        <button id="mobileMenuToggle" class="p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
+            <i data-lucide="menu" class="w-6 h-6"></i>
+        </button>
+    </header>
+
+    <!-- Main Content -->
+    <main class="lg:ml-72 transition-all duration-300 min-h-screen pb-24 lg:pb-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-8 py-8 md:py-12">
+            
+            <header class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div>
+                    <h1 id="currentDisplayDate" class="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-none">--</h1>
+                    <p class="text-slate-500 mt-3 font-medium text-lg">Organização de turnos e postos de trabalho.</p>
+                </div>
+                <div class="flex gap-3">
+                    <button id="copyWhatsAppBtn" class="flex-1 md:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-black transition-all shadow-xl shadow-green-100 active:scale-95">
+                        <i data-lucide="share-2" class="w-5 h-5"></i>
+                        COPIAR ESCALA
+                    </button>
+                </div>
+            </header>
+
+            <div id="scaleBoard" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 mb-16">
+                <!-- Colunas dos cargos -->
+            </div>
+
+            <section class="mt-16 pt-12 border-t-2 border-dashed border-slate-200">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                    <h2 class="text-2xl font-black text-slate-900 flex items-center gap-3">
+                        <i data-lucide="moon" class="w-7 h-7 text-indigo-500"></i>
+                        Colaboradores de Folga
+                    </h2>
+                    <span class="text-[10px] text-slate-400 font-black bg-white border border-slate-200 px-4 py-1.5 rounded-full uppercase tracking-widest shadow-sm">
+                        Arraste para folga ou trabalho
+                    </span>
+                </div>
+                <div id="folgaContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-h-[140px] p-6 bg-slate-100/50 rounded-[2rem] border-2 border-dashed border-slate-200 transition-all">
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Botão Flutuante Mobile (Opcional - já temos no header mas este é mais acessível) -->
+    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[90%] lg:hidden">
+        <button id="copyWhatsAppBtnMobile" class="w-full flex items-center justify-center gap-3 py-4 bg-green-600 text-white rounded-2xl font-black shadow-2xl active:scale-[0.98]">
+            <i data-lucide="share-2" class="w-6 h-6"></i>
+            COPIAR PARA WHATSAPP
+        </button>
+    </div>
+
+    <!-- Modal: Employee Form -->
+    <div id="employeeModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-0 sm:p-4 bg-slate-900/70 backdrop-blur-sm">
+        <div class="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-md shadow-2xl overflow-hidden self-end sm:self-center transition-all duration-300 translate-y-full sm:translate-y-0" id="modalContent">
+            <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 id="modalTitle" class="text-lg font-black text-slate-800">Editar Colaborador</h3>
+                <button class="closeModal p-2 hover:bg-slate-200 rounded-full transition-colors">
+                    <i data-lucide="x" class="w-6 h-6 text-slate-400"></i>
+                </button>
+            </div>
+            <form id="employeeForm" class="p-6 space-y-5 overflow-y-auto max-h-[80vh]">
+                <input type="hidden" id="empId">
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Nome Completo</label>
+                    <input type="text" id="empNome" required class="w-full h-12 px-4 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Cargo/Setor</label>
+                        <select id="empCargo" class="w-full h-12 px-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold appearance-none bg-white">
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Escala</label>
+                        <select id="empEscala" class="w-full h-12 px-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold appearance-none bg-white">
+                            <option value="12x36">12x36</option>
+                            <option value="5x1">5x1</option>
+                            <option value="6x1">6x1</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Início Ciclo</label>
+                        <input type="date" id="empCiclo" required class="w-full h-12 px-3 border border-slate-200 rounded-xl outline-none">
+                    </div>
+                    <div class="flex items-center pt-5 px-1">
+                        <label class="flex items-center gap-3 cursor-pointer group">
+                            <input type="checkbox" id="empPlantonista" class="w-6 h-6 text-blue-600 rounded-lg border-slate-300 focus:ring-blue-500">
+                            <span class="text-sm font-bold text-slate-700 group-hover:text-blue-600">Plantonista</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Entrada</label>
+                        <input type="time" id="empEntrada" class="w-full h-12 px-3 border border-slate-200 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Saída</label>
+                        <input type="time" id="empSaida" class="w-full h-12 px-3 border border-slate-200 rounded-xl">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Observação (Setor/Posto)</label>
+                    <input type="text" id="empObs" placeholder="Ex: Portaria A" class="w-full h-12 px-4 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="pt-6 flex flex-col sm:flex-row gap-3">
+                    <button type="submit" class="w-full h-14 bg-blue-600 text-white rounded-xl font-black shadow-xl order-1 sm:order-2">SALVAR ALTERAÇÕES</button>
+                    <button type="button" id="deleteEmployeeBtn" class="w-full h-14 text-red-600 font-bold hover:bg-red-50 rounded-xl order-2 sm:order-1 transition-colors">EXCLUIR</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Roles Management -->
+    <div id="rolesModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-0 sm:p-4 bg-slate-900/70 backdrop-blur-sm">
+        <div class="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-md shadow-2xl overflow-hidden self-end sm:self-center translate-y-full sm:translate-y-0" id="rolesModalContent">
+            <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 class="text-lg font-black text-slate-800">Gerenciar Cargos</h3>
+                <button class="closeRolesModal p-2 hover:bg-slate-200 rounded-full transition-colors"><i data-lucide="x" class="w-6 h-6 text-slate-400"></i></button>
+            </div>
+            <div class="p-6">
+                <div class="flex gap-2 mb-6">
+                    <input type="text" id="newRoleInput" placeholder="Novo cargo (ex: Portaria)" class="flex-1 h-12 px-4 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold">
+                    <button id="addRoleBtn" class="bg-blue-600 text-white px-5 rounded-xl font-bold transition-transform active:scale-95"><i data-lucide="plus" class="w-5 h-5"></i></button>
+                </div>
+                <div id="rolesList" class="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                    <!-- Lista de cargos injetada -->
+                </div>
+                <p class="text-[10px] text-slate-400 font-bold uppercase mt-6 text-center tracking-widest leading-relaxed">Nota: Remover um cargo move os colaboradores vinculados para o Banco de Talentos.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-28 left-1/2 -translate-x-1/2 z-[110] px-8 py-4 bg-slate-900 text-white rounded-2xl shadow-2xl text-sm font-bold opacity-0 pointer-events-none transition-all duration-300 border border-white/10 whitespace-nowrap">
+        Escala copiada com sucesso!
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>

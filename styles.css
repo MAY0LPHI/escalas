@@ -1,0 +1,68 @@
+:root {
+    --primary: #2563eb;
+    --success: #10b981;
+    --danger: #ef4444;
+}
+
+* { 
+    -webkit-tap-highlight-color: transparent; 
+    user-select: none; 
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+input, textarea, select { user-select: text; }
+body { -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 20px; }
+::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+
+.employee-card {
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease, box-shadow 0.2s ease;
+    touch-action: none;
+    animation: popIn 0.3s ease-out forwards;
+}
+
+.employee-card:hover {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+.sortable-ghost { opacity: 0.2; background: #dbeafe !important; border: 3px dashed #2563eb !important; transform: scale(0.95); }
+.sortable-drag { cursor: grabbing; z-index: 9999; transform: rotate(1deg) scale(1.02); box-shadow: 0 40px 80px -15px rgba(0,0,0,0.2) !important; }
+
+#drawerOverlay.active { display: block; opacity: 1; }
+#mainSidebar.active { transform: translateX(0); }
+
+#employeeModal.active, #rolesModal.active { display: flex; }
+#employeeModal.active #modalContent, #rolesModal.active #rolesModalContent { transform: translateY(0); }
+
+@media (max-width: 640px) {
+    #modalContent, #rolesModalContent { border-radius: 2.5rem 2.5rem 0 0 !important; }
+}
+
+.category-zone {
+    padding: 0.5rem;
+    background: #f8fafc;
+    border-radius: 1.5rem;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.category-zone.drag-over { background: #eff6ff; border-color: #bfdbfe; }
+
+@keyframes popIn {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 1rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 3rem;
+}
+
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
